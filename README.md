@@ -80,14 +80,15 @@ The STAT_HRS value increases as soon the DMX value is > 0.<br>
 Request timing (ms): This value specifies the timing within the additional channels are requested one by one and the
 power consumption and runtime is calculated.<br>
 
-## 1.1.0
-released for use with DMXfaceXP Controller
+## 2.0.0
+released 2024.06 for use with DMXfaceXP Controller V5.17 to latest Version (5.60)
 
 ##  Changelog
 1.0.0  Initial release<br>
 1.0.1  Bugfixes (reconnect procedure after loosing TCP connection)<br>
 1.0.2  File cleanup+ Bugfix (List of additional ports causes error @ first start due to NULL value<br>
-1.1.0  New version of the adapter containing min/max tracking and power tracking)
+1.1.0  New version of the adapter containing min/max tracking and power tracking
+2.0.0  String objects for additional requested channels to get full access to CharBuffers of DMXface
 ## License
 MIT License<br>
 
