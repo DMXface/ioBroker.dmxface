@@ -1,6 +1,6 @@
 ![Logo](admin/dmxface.png)
 http://www.dmxface.at
-## ioBroker.dmxface 1.1.0 Adapter
+## ioBroker.dmxface 2.0.0 Adapter (06.2024)
 DMXface is a programmable IO controller with features as follows:
  DMX OUT and DMX IN bus
  8 to 16 INports with analog to digital support for all channels
@@ -13,20 +13,19 @@ DMXface is a programmable IO controller with features as follows:
  RTC Clock with day of week / date
  Optional RS232, KNX, DALI, audio triggering, ...<br>
  Available resources:
-224 DMX channels (512+32 with PRO Firmware)<br>
-180 Storeable scenes with fade times 0.0 to 165 Sec. 
-28	Programs (56 with PRO Firmware)
-64	Event triggers (80 with PRO Firmware)
-4	Recordable timelines with 50msek resolution (8 with PRO Firmware)<br>
-32	Sendsequences (48 with PRO Firmware)<br>
+  512+32 DMX Channels<br>
+  198 Storeable scenes with fade times 0.0 to 600 Sec. <br> 
+  56 Programs <br>
+  96 Event triggers <br> 
+  8 Recordable timelines with 50msek resolution <br>
+  48 Sendsequences<br>
 Dokumentation and communication protocoll downloads: 
-http://www.spl-technik.at/index.php/dmxface-downloads
+http://www.dmxface.at
  
 ## DMXface adapter for ioBroker
 This adapter connects the DMXfaceXP controller with ioBroker.
 The communication protocoll used is the DMXface ACTIVE SEND protocoll.
-Rev 1.1.0 supports additional features like min/max tracking of channels as well 
-the calculation of power consumed for selected channels.
+Rev 2.0.0 creates string objects for additional requested channels to get all data forwarded from DMXface, not just the converted float.
 
 ## Setup the DMXface
 To configure the DMXface controller, you need the 'DMXface Console' downloadable at http://www.dmxface.at
@@ -54,19 +53,27 @@ Port: Same as configured in the network socket 6 or 7.
 Last DMX channel used: Number of DMX state objects that will be created when the DMXface adapter ist started.
 Additional channel requests:
 DMXface covers the possibility to process values of DMX channels, AD values of IN- or BUSports by a conversion table. 
-Here you can list additional ports that should be requested from such a conversion.
-Enter the required channel separated by semicolons like IN1, OUT5, DMX112,...
+Here you can list additional ports that should be also available for ioBroker
+Enter the required channel separated by semicolons like IN1, OUT5, DMX112, BUS1, CHAR1<br>
+IN1 to IN16 - Inport AD Values <br>
+OUT1 to OUT16 - OUTPORT Values <br>
+DMX1 to DMX544 - DMX Channels <br>
+BUS1 to BUS 32 - BUS Port AD values<br>
+CHAR1 to CHAR12 - CharBuffers of the DMXface<br>
+
 ioBroker requests the values one by one withing the timing and stores it in additional float numbers in states VALUE_...<br>
 
 Power consumption and runtime tracking:
+
 Here you can list IO and DMX ports, optional with the power of the load controlled by the channel.
+
 Format is e.g. OUT5(750) this means that OUTPORT5 controls a 750W load.
 If no powerload is added just the runtime will be tracked.
 As soon there is a channel added you will get one or two new states for the port.
 STAT_HRS_OUTPORT05 and if a power value is added the state STAT_KWH_OUTPORT05. 
 STAT_KWH contains the KW/h and increases as soon OUTPORT5 is true.
 STAT_HRS is the time in hours while OUTPORT5 was true.
-If you use a DMX channel the power value is calculated with the value of the DMX channel.
+If you use a DMX channel the power value rate is calculated with the value of the DMX channel.
 A DMX value =0 is off, a DMX value of 128 adds half of the power value, a DMX value 255 adds full value to the POWER_xx value.
 The STAT_HRS value increases as soon the DMX value is > 0.<br>
 
