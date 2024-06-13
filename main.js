@@ -1,5 +1,10 @@
 'use strict';
+
 //DMXfaceXP Adapter for ioBroker
+//REV 2.0.0 (06.2024) 
+//Implementation Object when receiving  additional channels , so that the string received from DMXface is also availble, not just the float converted value
+//If Charbuffers are forwarded, you can process content as string also
+
 //REV 1.1.0
 //Update to the last version of the ACTIVE SEND Protokoll 5.16
 //Implements Power measurement with IN, OUT, BUS and DMX Ports
@@ -78,12 +83,15 @@ adapter.on ('ready',function (){
 	
 	adapter.log.info ("DMXfaceXP " + IPADR + " Port:" + PORT + " DMXchannels:" + DMX_CHANNELS_USED);
 
-//Read and check the user configurable string containig additional ports that will by requested by ioBroker
+//ADDITIONAL CHANNEL REQUEST STRING, Read and check the user configurable string containig additional ports that should  by requested by ioBroker
+//This Part reads and splits the string content
 	if (EX_REQUEST_LIST==null) {EX_REQUEST_LIST = "";}		// maybe NULL @ first start
 	EX_REQUEST_LIST = EX_REQUEST_LIST.trim();				//Remove blanks
 	if (EX_REQUEST_LIST.length > 0){						//Check for content
 		EX_REQUEST_LIST = EX_REQUEST_LIST.toUpperCase();		//Uppercase "IN1,IN3,BUS4,..."
 		var BUFF = EX_REQUEST_LIST.split(",");					//Split the content seperated by ","
+
+	if (LOG_ALL) {adapter.log.info ("User String Elemente:" + BUFF.length)}
 
 		for (i=0; i<BUFF.length; i++){							//Check the elements vor valid entries and add to list 
 			var BB = BUFF[i].trim();
@@ -116,9 +124,9 @@ adapter.on ('ready',function (){
 					}
 					break;
 				//REV1.1 Update CHAR BUFFERS valid from DMXface Firmware 5.17
-				case 'C':   //CHAR BUFFER REQUEST 1-8
+				case 'C':   //CHAR BUFFER REQUEST 1-12
 					var PNR = parseInt(BB.substring(4));   // e.g. "CHAR7" -> Position 4++ has to contain CHAR BUFFER NR
-					if (PNR >0 && PNR <9) {						//VALID NUMBER 1 to 8
+					if (PNR >0 && PNR <13) {						//VALID NUMBER 1 to 12
 						EX_REQUEST_PORTS += 'C';				//ADD Element to list
 						EX_REQUEST_NUMBERS.push (PNR);
 						EX_REQUEST_NAMES.push ('VALUE_' +GetCHARBUFFER(PNR));
@@ -131,7 +139,7 @@ adapter.on ('ready',function (){
 		}
 	}
 						
-//Read and check the user configurable Power/RUNTIME string containig additional ports that will measured
+//RUNTIME POWER TRACKING STRING  / Read and check the user configurable Power/RUNTIME string containig additional ports that will measured
 	if (PW_REQUEST_LIST==null) {PW_REQUEST_LIST = "";}		// maybe NULL @ first start
 	PW_REQUEST_LIST = PW_REQUEST_LIST.trim();				//Remove blanks
 	if (PW_REQUEST_LIST.length > 0){						//Check for content
@@ -176,7 +184,7 @@ adapter.on ('ready',function (){
 						isBOOL = false;
 					}
 					break;
-				
+	
 				default:
 					break;
 			}
@@ -193,7 +201,7 @@ adapter.on ('ready',function (){
 		}
 	}
 	
-//Initialize ioBrokers state objects if they dont exist
+//Initialize ioBrokers default state objects for DMX / INPORTS / BUSPORT / OUTPORTS if they dont exist
 //DMX CHANNELS contain and send DMX value 0-255 to a DMX channel
 	for (i=1;i<=DMX_CHANNELS_USED;i++){
 		adapter.setObjectNotExists (GetDMX(i),{
@@ -249,13 +257,22 @@ adapter.on ('ready',function (){
 		});		
 	}
 		
-//User specific requests of addtional port values, create one object for each value
+//Create Objects for additional channel requests
 	for (i=0; i < EX_REQUEST_NAMES.length; i++){
+//Float Object for listed channel 
 		adapter.setObjectNotExists (EX_REQUEST_NAMES[i],{
 			type:'state',
-			common:{name: EX_REQUEST_NAMES[i],type:'number',role:'value',read:true,write:false},
+			common:{name: EX_REQUEST_NAMES[i]+"_float",type:'number',role:'value',read:true,write:false},
+			native:{}
+		});
+//NEW Release 2.00 --> Addtional String OBJECT for each listed channel
+			adapter.setObjectNotExists (EX_REQUEST_NAMES[i]+"_string",{
+			type:'state',
+			common:{name: EX_REQUEST_NAMES[i]+"_string",type:'string',role:'text',read:true,write:false},
 			native:{}
 		});	
+
+//Additional Object for MIN / MAX / RESET if MIN MAX Tracking is enabled		
 		if (EX_MINMAX_TRACKING) {
 			adapter.setObjectNotExists (EX_REQUEST_NAMES[i]+"_min",{
 				type:'state',
@@ -275,8 +292,8 @@ adapter.on ('ready',function (){
 		}
 	}
 	
-//POWER Reading Values 	
-for (i=0; i < PW_REQUEST_OUTPUT.length; i++){
+//IF Channels in POWER TRACKING are listed create a RUNTIME and POWER CONSUMTION OBJECT of each	
+	for (i=0; i < PW_REQUEST_OUTPUT.length; i++){
 		//RUNTIME OBJECT hours
 		adapter.setObjectNotExists (PW_REQUEST_RUNTIME[i],{
 			type:'state',
@@ -620,7 +637,10 @@ function CBclientRECEIVE(RXdata) {
 				exFLOAT = parseFloat (strVALUE.replace (",","."));
 				//Transfer to OBJECT
 				if (LOG_ALL){adapter.log.info ("RX: " + exNAME + " DATA:" + exFLOAT)};
+				//HOST FLOAT OBJECT of an additional channel 
 				adapter.setState(exNAME,exFLOAT);
+				//HOST STRING OBJECT of an additional channel 
+				adapter.setState(exNAME+"_string",strVALUE);
 				
 				if (EX_MINMAX_TRACKING) {
 				
@@ -690,7 +710,7 @@ function GetBUS (number){
 }
 //Rev 1.1 added for char Buffers
 function GetCHARBUFFER (number){
-	if (number <10) {return 'CHAR0'+number;}
+	if (number < 10) {return 'CHAR0'+number;}
 	return 'CHAR'+number;
 }
 

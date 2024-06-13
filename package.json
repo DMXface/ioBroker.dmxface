@@ -1,6 +1,6 @@
 {
    "name":"iobroker.dmxface",
-   "version":"1.1.0",
+   "version":"2.0.0",
    "description":"DMXfaceXP adapter for ioBroker",
    "author":{
       "name":"Hufnagl Oliver",
