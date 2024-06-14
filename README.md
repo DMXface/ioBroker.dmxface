@@ -44,7 +44,8 @@ Select the number of DMX channels (max. 224) to be transmitted to ioBroker and t
 Save the changes, done.
 
 ## Add adapter to ioBroker
-Add the DMXface adapter from github  https://github.com/DMXface/ioBroker.dmxface.git
+Add the DMXface adapter from github<br>
+https://github.com/DMXface/ioBroker.dmxface.git
 Create an instance of the adapter.
 
 ## Adapter configuration
