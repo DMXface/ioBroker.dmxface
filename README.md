@@ -46,7 +46,7 @@ Save the changes, done.
 ## Add adapter to ioBroker
 Add the DMXface adapter from github<br>
 https://github.com/DMXface/ioBroker.dmxface.git
-Create an instance of the adapter.
+<br>Create an instance of the adapter.
 
 ## Adapter configuration
 IP address:  Same as used for the DMXfaceXP controller.
