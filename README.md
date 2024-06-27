@@ -1,6 +1,6 @@
 ![Logo](admin/dmxface.png)
 http://www.dmxface.at
-## ioBroker.dmxface 2.0.0 Adapter (06.2024)
+## ioBroker.dmxface 2.0.1 Adapter (06.2024)
 DMXface is a programmable IO controller with features as follows:
  DMX OUT and DMX IN bus
  8 to 16 INports with analog to digital support for all channels
@@ -25,6 +25,7 @@ http://www.dmxface.at
 ## DMXface adapter for ioBroker
 This adapter connects the DMXfaceXP controller with ioBroker.
 The communication protocoll used is the DMXface ACTIVE SEND protocoll.
+Rev 2.0.1 BUGFIX state changes without ACK at readonly objects cause LOG warning entry
 Rev 2.0.0 creates string objects for additional requested channels to get all data forwarded from DMXface, not just the converted float.
 
 ## Setup the DMXface
@@ -44,6 +45,7 @@ Select the number of DMX channels (max. 224) to be transmitted to ioBroker and t
 Save the changes, done.
 
 ## Add adapter to ioBroker
+Change to expert mode, add adapter by URL
 Add the DMXface adapter from github<br>
 https://github.com/DMXface/ioBroker.dmxface.git
 <br>Create an instance of the adapter.

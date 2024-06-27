@@ -1,7 +1,7 @@
 {
    "common":{
       "name":"dmxface",
-      "version":"2.0.0",
+      "version":"2.0.1",
       "news":{
          "2.2.0":{
             "en":"ioBroker adapter for DMXfaceXP controllers 5.60",

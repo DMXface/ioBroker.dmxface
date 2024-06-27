@@ -1,6 +1,7 @@
 'use strict';
 
 //DMXfaceXP Adapter for ioBroker
+//REV 2.0.1 (06.2024) setState mit ACK bei _Float,_String,Inport sonst kommt es zu warnings im LOG
 //REV 2.0.0 (06.2024) 
 //Implementation Object when receiving  additional channels , so that the string received from DMXface is also availble, not just the float converted value
 //If Charbuffers are forwarded, you can process content as string also
@@ -566,11 +567,11 @@ function CBclientRECEIVE(RXdata) {
 				x =1;
 				for (i=1;i<0x81;i*=2){
 					if (i & RXdata[8]){ONOFF = true;} else {ONOFF = false;}
-					adapter.setState(GetIN(x),ONOFF);
+					adapter.setState(GetIN(x),ONOFF,true);			//2.0.1 mitACK bei READ ONLY STATES
 					if (i & RXdata[7]){ONOFF = true;} else {ONOFF = false;}
-					adapter.setState(GetIN(x+8),ONOFF);
+					adapter.setState(GetIN(x+8),ONOFF,true);		//2.0.1 mitACK bei READ ONLY STATES	
 					//if (i & RXdata[6]){ONOFF = true;} else {ONOFF = false;}
-					//adapter.setState(GetIN(x+16),ONOFF);
+					//adapter.setState(GetIN(x+16),ONOFF,true);		//2.0.1 mitACK bei READ ONLY STATES
 					if (i & RXdata[5]){ONOFF = true;} else {ONOFF = false;}
 					adapter.setState(GetBUS(x),ONOFF);
 					if (i & RXdata[4]){ONOFF = true;} else {ONOFF = false;}
@@ -638,9 +639,9 @@ function CBclientRECEIVE(RXdata) {
 				//Transfer to OBJECT
 				if (LOG_ALL){adapter.log.info ("RX: " + exNAME + " DATA:" + exFLOAT)};
 				//HOST FLOAT OBJECT of an additional channel 
-				adapter.setState(exNAME,exFLOAT);
+				adapter.setState(exNAME,exFLOAT,true);			//2.0.1 Mit ACK bei Read Only
 				//HOST STRING OBJECT of an additional channel 
-				adapter.setState(exNAME+"_string",strVALUE);
+				adapter.setState(exNAME+"_string",strVALUE,true);	//2.0.1 Mit ACK bei Read Only
 				
 				if (EX_MINMAX_TRACKING) {
 				
