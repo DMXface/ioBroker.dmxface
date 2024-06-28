@@ -1,7 +1,8 @@
 'use strict';
 
 //DMXfaceXP Adapter for ioBroker
-//REV 2.0.1 (06.2024) setState mit ACK bei _Float,_String,Inport sonst kommt es zu warnings im LOG
+//REV 2.0.1 (06.2024) Allows up to 30 CHARBUFFERS and 544 DMX Channels
+//		 setState with ACK at _Float,_String,Inport due to warnings in LOG
 //REV 2.0.0 (06.2024) 
 //Implementation Object when receiving  additional channels , so that the string received from DMXface is also availble, not just the float converted value
 //If Charbuffers are forwarded, you can process content as string also
@@ -76,7 +77,7 @@ adapter.on ('ready',function (){
 	EX_MINMAX_TRACKING = adapter.config.minmaxtracking;
 
 //LIMIT the number of DMX channels max. 224 usable with ioBroker
-	if (DMX_CHANNELS_USED >224) {DMX_CHANNELS_USED = 224};
+	if (DMX_CHANNELS_USED >544) {DMX_CHANNELS_USED = 544};
 	if (DMX_CHANNELS_USED <0) {DMX_CHANNELS_USED = 0};
 //LIMIT the request timimng	
 	if (TIMING <100){TIMING = 100;}
@@ -127,7 +128,7 @@ adapter.on ('ready',function (){
 				//REV1.1 Update CHAR BUFFERS valid from DMXface Firmware 5.17
 				case 'C':   //CHAR BUFFER REQUEST 1-12
 					var PNR = parseInt(BB.substring(4));   // e.g. "CHAR7" -> Position 4++ has to contain CHAR BUFFER NR
-					if (PNR >0 && PNR <13) {						//VALID NUMBER 1 to 12
+					if (PNR >0 && PNR <30) {						//VALID NUMBER 1 to 12
 						EX_REQUEST_PORTS += 'C';				//ADD Element to list
 						EX_REQUEST_NUMBERS.push (PNR);
 						EX_REQUEST_NAMES.push ('VALUE_' +GetCHARBUFFER(PNR));
@@ -602,7 +603,7 @@ function CBclientRECEIVE(RXdata) {
 		case 0x49: //AD INPORT REQUEST RETURN  0xF0,0x49,PORTNR_HIGH,PORTNR LOW , bDIGITAL VALUE, bANALOG VALUE, 'TEXT VALUE eg. 34.55 GRAD'
 			//EXTRACT PORT and Float value, write it to the coreesponding object if exists
 			if (RXdata.length > 8){   
-				var exFLOAT = 0;				//Resulting float Value 
+				var exFLOAT = 0;				                //Resulting float Value 
 				var exNUMBER = (RXdata[2]*256)+ RXdata[3]		//PORT NUMBER  1-24 INPORTS 1-24
 																//25-56 BUS 1-32
 				var exPORTS = '';							    //0x101-0x320 DMX 1-544
@@ -616,14 +617,14 @@ function CBclientRECEIVE(RXdata) {
 					exPORTS ='B';							// BUS PORT
 					exNAME = "VALUE_" + GetBUS(exNUMBER);	// OBJECT NAME
 				}
-				//UPGRADE REV 1.1  CHAR BUFFER REQUESTS valid from DMXface Firmware 5.17
-				if (exNUMBER >=0xE1 && exNUMBER <=0xE8) {				
+				//UPGRADE REV 1.1  CHAR BUFFER REQUESTS valid from DMXface Firmware 5.17 / Allows at least a maximum of 30 CHARBUFFERS 0xE1 to 0xFE
+				if (exNUMBER >=0xE1 && exNUMBER <=0xFE) {				
 					exNUMBER-=0xE0;							// REMOVE OFFSET
 					exPORTS ='C';							// BUS PORT
 					exNAME = "VALUE_" + GetCHARBUFFER(exNUMBER);	// OBJECT NAME
 				}
 				
-				if (exNUMBER >=257 && exNUMBER <=481) {				
+				if (exNUMBER >=257 && exNUMBER <=800) {				
 					exNUMBER-=256;							// REMOVE OFFSET
 					exPORTS ='D';							// BUS PORT
 					exNAME = "VALUE_" + GetDMX(exNUMBER);	// OBJECT NAME
